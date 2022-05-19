@@ -6,11 +6,9 @@
 #include <math.h>
 #define prec 0.01
 
-int N;
-int pos;
-
 float *A,*auxVec,*auxSwap;
-int T, convergeGlobal=0,*convergeVec, iteraciones=0;
+int N,pos,T, convergeGlobal=0,*convergeVec, iteraciones=0;
+
 pthread_barrier_t barrera; 
 
 
@@ -41,6 +39,7 @@ void* funcion(void *arg){
     posFinal--;
     auxVec[N-1]=(A[N-2]+A[N-1])*0.5;
     
+    printf("A[N-2] es %.7f A[N-1] es %.7f \n", A[N-2],A[N-1]);
     
     if( (fabs(primero-auxVec[N-1]) > prec) ){
      convergeVec[tid]=0;
@@ -53,15 +52,21 @@ void* funcion(void *arg){
     
     auxVec[i]=(A[i-1]+A[i]+A[i+1])/3;
     
-    if( fabs(primero-auxVec[i])>prec ){
+    if( fabs(primero-auxVec[i])>prec){
      
      printf("Hilo %d, B[0]-B[%d] = %.7f - B[0]=%.7f y B[%d]=%.7f \n",tid,i,fabs(primero-auxVec[i]),auxVec[0],i,auxVec[i]);
      //printf("le erro por %f \n",primero-auxVec[i]);
      convergeVec[tid]=0; //vector de threads convergentes
      //convergeLocal=0; //para que no entre mas a este if si ya sabemos que no converge
+     //break;
     }
     
   }
+  
+  /*
+  for(;i<posFinal;i++){ //termino de computar lo que rompi en el break de arriba
+    auxVec[i]=(A[i-1]+A[i]+A[i+1])/3;
+  }*/
   
   //barrera para esperar
   pthread_barrier_wait(&barrera);
@@ -80,7 +85,14 @@ void* funcion(void *arg){
     auxSwap=A;
     A=auxVec;
     auxVec=auxSwap;
+    
     printf("iteracion: %d y i es %d\n",iteraciones,i);
+    
+    for(i=0;i<N;i++){
+      //A[i]=auxVec[i];
+      printf("auxVec[%d]= %.7f \n",i,auxVec[i]);
+    }
+    
   }
   
   //barrera para esperar
