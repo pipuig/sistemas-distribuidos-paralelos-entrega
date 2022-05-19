@@ -2,8 +2,10 @@
 #include<stdlib.h>
 #include <sys/time.h>
 #include <math.h>
+#include <time.h>
 
 double dwalltime();
+int iteraciones =0;
 
 float absoluto(float a){
     printf("%f ", a);
@@ -13,7 +15,7 @@ float absoluto(float a){
 
 void secuencialUnaDim (float* V, int size){
     int i, contador = 0;
-    float * arr = malloc(size*sizeof(float));
+    float *swapAux, * arr = malloc(size*sizeof(float));
     int converge = 0;
     while (converge == 0){ //se repite el proceso hasta encontrar la convergencia
         converge = 1; //inicio suponiendo que el vector es convergente
@@ -22,21 +24,52 @@ void secuencialUnaDim (float* V, int size){
         for (i=1; i < size-1; i++){ //calculo los promedios en un vector auxiliar (antes del for los casos particulares)
             arr[i] = (V[i-1] + V[i] + V[i+1])/3;
             }
-        for (i=0; i < size; i++){
+        /*for (i=0; i < size; i++){
             V[i] = arr[i];
-            }
+            }*/
+            swapAux=V;
+            V=arr;
+            arr=swapAux;
         for (i=0; i < size; i++){ //verifico convergencia del vector resultante
             if (fabs((V[0]-V[i])) > 0.01){ 
                 converge = 0; //si alguno se pasa del valor de precision vuelvo a realizar la reducción
                 break;
                 }
             }
+            iteraciones++;
         }
         printf("\n %d\n", contador);
         for (i=0; i < size; i++){
             printf ("%f ", V[i]);
             }
         printf("\n");
+}
+
+
+int main(int argc, char *argv[]){
+   int N = atoi(argv[1]);
+   srand(time(NULL));
+   double timetick;
+   float a;
+   int i,j;
+   float* arreglo = malloc(N*sizeof(float));
+   //matriz = malloc(N*N*sizeof(float));
+   for(i = 0; i<N; i++){
+       arreglo[i] = (float)rand()/((float)RAND_MAX);
+   }
+    timetick = dwalltime();
+    secuencialUnaDim(arreglo, N);
+    printf("\ntiempo en segundos %f con %d iteraciones\n", dwalltime()-timetick, iteraciones);
+    return 0;
+}
+
+
+double dwalltime(){
+        double sec;
+        struct timeval tv;
+        gettimeofday(&tv,NULL);
+        sec = tv.tv_sec + tv.tv_usec/1000000.0;
+        return sec;
 }
 
 /*void secuencialDosDim(float ** V, int size){
@@ -83,25 +116,3 @@ void secuencialUnaDim (float* V, int size){
 
 }
 */
-int main(int argc, char *argv[]) 
-{
-   int N = 16;
-   float a;
-   int i,j;
-   float* arreglo = malloc(N*sizeof(float));
-   //matriz = malloc(N*N*sizeof(float));
-   for(i = 0; i<N; i++){
-       arreglo[i] = (float)rand()/((float)RAND_MAX);
-   }
-    secuencialUnaDim(arreglo, N);
-    return 0;
-}
-
-
-double dwalltime(){
-        double sec;
-        struct timeval tv;
-        gettimeofday(&tv,NULL);
-        sec = tv.tv_sec + tv.tv_usec/1000000.0;
-        return sec;
-}

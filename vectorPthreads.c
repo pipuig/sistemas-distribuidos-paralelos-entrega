@@ -20,6 +20,8 @@ void* funcion(void *arg){
   int posInicio=pos*(tid);
   int posFinal=posInicio+pos;
   int convergeLocal=1;
+  if (tid == 0) posInicio++;
+  if (tid == T-1) posFinal--;
   
   while(convergeGlobal == 0){
   
@@ -29,17 +31,15 @@ void* funcion(void *arg){
   //printf("primero: %f \n",primero);
   
   if(tid == 0){ //si soy el primer thread el primero no lo hago porque ya lo hice
-    posInicio++;
     auxVec[0]=primero;
     //printf("auxvec: %f \n",auxVec[0]);
   }
   
   if(tid == T-1){
   //si soy el thread que hace el ultimo cacho, no quiero que el for lo haga porque tiene una formula aparte
-    posFinal--;
     auxVec[N-1]=(A[N-2]+A[N-1])*0.5;
     
-    printf("A[N-2] es %.7f A[N-1] es %.7f \n", A[N-2],A[N-1]);
+    printf("A[%d] es %.7f A[%d] es %.7f \n",N-2, A[N-2], N-1, A[N-1]);
     
     if( (fabs(primero-auxVec[N-1]) > prec) ){
      convergeVec[tid]=0;
@@ -58,15 +58,15 @@ void* funcion(void *arg){
      //printf("le erro por %f \n",primero-auxVec[i]);
      convergeVec[tid]=0; //vector de threads convergentes
      //convergeLocal=0; //para que no entre mas a este if si ya sabemos que no converge
-     //break;
+     break;
     }
     
   }
   
-  /*
+  
   for(;i<posFinal;i++){ //termino de computar lo que rompi en el break de arriba
     auxVec[i]=(A[i-1]+A[i]+A[i+1])/3;
-  }*/
+  }
   
   //barrera para esperar
   pthread_barrier_wait(&barrera);
