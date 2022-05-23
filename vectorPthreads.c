@@ -8,6 +8,7 @@
 
 float *A,*auxVec,*auxSwap;
 int N,pos,T, convergeGlobal=0,*convergeVec, iteraciones=0;
+const float tercio = 1.0/3.0;
 
 pthread_barrier_t barrera; 
 
@@ -39,33 +40,31 @@ void* funcion(void *arg){
   //si soy el thread que hace el ultimo cacho, no quiero que el for lo haga porque tiene una formula aparte
     auxVec[N-1]=(A[N-2]+A[N-1])*0.5;
     
-    printf("A[%d] es %.7f A[%d] es %.7f \n",N-2, A[N-2], N-1, A[N-1]);
+    //printf("A[%d] es %.7f A[%d] es %.7f \n",N-2, A[N-2], N-1, A[N-1]);
     
     if( (fabs(primero-auxVec[N-1]) > prec) ){
      convergeVec[tid]=0;
-     printf("Hilo %d, B[0]-B[%d] = %.7f - B[0]=%.7f y B[%d]=%.7f \n",tid,N-1,fabs(primero-auxVec[N-1]),auxVec[0],N-1,auxVec[N-1]);
+     //printf("Hilo %d, B[0]-B[%d] = %.7f - B[0]=%.7f y B[%d]=%.7f \n",tid,N-1,fabs(primero-auxVec[N-1]),auxVec[0],N-1,auxVec[N-1]);
     }
     
   }
   
   for(i=posInicio; i<posFinal;i++){
     
-    auxVec[i]=(A[i-1]+A[i]+A[i+1])/3;
+    auxVec[i]=(A[i-1]+A[i]+A[i+1])*tercio;
     
     if( fabs(primero-auxVec[i])>prec){
      
-     printf("Hilo %d, B[0]-B[%d] = %.7f - B[0]=%.7f y B[%d]=%.7f \n",tid,i,fabs(primero-auxVec[i]),auxVec[0],i,auxVec[i]);
+     //printf("Hilo %d, B[0]-B[%d] = %.7f - B[0]=%.7f y B[%d]=%.7f \n",tid,i,fabs(primero-auxVec[i]),auxVec[0],i,auxVec[i]);
      //printf("le erro por %f \n",primero-auxVec[i]);
      convergeVec[tid]=0; //vector de threads convergentes
      //convergeLocal=0; //para que no entre mas a este if si ya sabemos que no converge
      break;
     }
     
-  }
-  
-  
+  }  
   for(;i<posFinal;i++){ //termino de computar lo que rompi en el break de arriba
-    auxVec[i]=(A[i-1]+A[i]+A[i+1])/3;
+    auxVec[i]=(A[i-1]+A[i]+A[i+1])*tercio;
   }
   
   //barrera para esperar
@@ -86,12 +85,12 @@ void* funcion(void *arg){
     A=auxVec;
     auxVec=auxSwap;
     
-    printf("iteracion: %d y i es %d\n",iteraciones,i);
+    //printf("iteracion: %d y i es %d\n",iteraciones,i);
     
-    for(i=0;i<N;i++){
+    /*for(i=0;i<N;i++){
       //A[i]=auxVec[i];
       printf("auxVec[%d]= %.7f \n",i,auxVec[i]);
-    }
+    }*/
     
   }
   
@@ -134,7 +133,7 @@ double dwalltime(){
     //Inicializa el vector con numeros random
     for(i=0;i<N;i++){
        A[i]=(float)rand()/(float)(RAND_MAX/1);
-       printf("%f ",A[i]);
+       printf("%f\n",A[i]);
        
     }
     printf("\n");

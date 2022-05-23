@@ -23,19 +23,27 @@ void secuencialUnaDim (float* V, int size){
         arr[size-1] = (V[size-1] + V[size-2])/2;
         for (i=1; i < size-1; i++){ //calculo los promedios en un vector auxiliar (antes del for los casos particulares)
             arr[i] = (V[i-1] + V[i] + V[i+1])/3;
+             if (fabs((V[0]-V[i])) > 0.01){ 
+                converge = 0; //si alguno se pasa del valor de precision vuelvo a realizar la reducción
+                break;
+                }
             }
+        for (;i<size-1;i++){
+            arr[i] = (V[i-1] + V[i] + V[i+1])/3;
+            }
+        
         /*for (i=0; i < size; i++){
             V[i] = arr[i];
             }*/
             swapAux=V;
             V=arr;
             arr=swapAux;
-        for (i=0; i < size; i++){ //verifico convergencia del vector resultante
+        /*for (i=0; i < size; i++){ //verifico convergencia del vector resultante
             if (fabs((V[0]-V[i])) > 0.01){ 
                 converge = 0; //si alguno se pasa del valor de precision vuelvo a realizar la reducción
                 break;
                 }
-            }
+            }*/
             iteraciones++;
         }
         printf("\n %d\n", contador);
@@ -45,7 +53,23 @@ void secuencialUnaDim (float* V, int size){
         printf("\n");
 }
 
+/*void secuencialDosDim(float* M, int N){
+    int i,j, converge = 0;
+    float mat = malloc(sizeof(float)*N*N);
+    while (converge == 0){
+        converge = 1;
+        mat[0] = (M[0] + M[1] + M[N] + M[N+1])/4;
+        mat[N-1] = (M[N-1] + M[N-2] + M[2*N-2] + M[2*N-1])/4;
+        mat[N*(N-1)] = (M[N*(N-1)] + M[N*(N-2)] + M[N*(N-2)+1] + M[N*(N-1)+1])/4;
+        mat[N*N-1] = (M[N*N-1] + M[N*(N-1)-1] + M[N*(N-1)+(N-2)] + M[N*(N-2)+(N-1)])/4;
+        for (i=1;i<N-1;i++){
+            for(j=0;j<N-1;j++){
 
+            }
+        }
+        }
+    }
+*/
 int main(int argc, char *argv[]){
    int N = atoi(argv[1]);
    srand(time(NULL));
