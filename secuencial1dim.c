@@ -21,9 +21,11 @@ void secuencialUnaDim (float* V, int size){
         converge = 1; //inicio suponiendo que el vector es convergente
         arr[0] = (V[0] + V[1])/2;
         arr[size-1] = (V[size-1] + V[size-2])/2;
+        if (fabs((arr[0]-arr[size-1])) > 0.01) converge = 0;
+
         for (i=1; i < size-1; i++){ //calculo los promedios en un vector auxiliar (antes del for los casos particulares)
             arr[i] = (V[i-1] + V[i] + V[i+1])/3;
-             if (fabs((V[0]-V[i])) > 0.01){ 
+             if (converge != 0 && fabs((arr[0]-arr[i])) > 0.01){ 
                 converge = 0; //si alguno se pasa del valor de precision vuelvo a realizar la reducción
                 break;
                 }
@@ -46,11 +48,11 @@ void secuencialUnaDim (float* V, int size){
             }*/
             iteraciones++;
         }
-        printf("\n %d\n", contador);
+        /*printf("\n %d\n", contador);
         for (i=0; i < size; i++){
             printf ("%f ", V[i]);
             }
-        printf("\n");
+        printf("\n");*/
 }
 
 /*void secuencialDosDim(float* M, int N){
@@ -80,9 +82,11 @@ int main(int argc, char *argv[]){
    //matriz = malloc(N*N*sizeof(float));
    for(i = 0; i<N; i++){
        arreglo[i] = (float)rand()/((float)RAND_MAX);
+       printf("%f - ", arreglo[i]);
    }
     timetick = dwalltime();
     secuencialUnaDim(arreglo, N);
+    free(arreglo);
     printf("\ntiempo en segundos %f con %d iteraciones\n", dwalltime()-timetick, iteraciones);
     return 0;
 }
