@@ -9,9 +9,10 @@ int partes;
 
 void funcionA(){
 	vec = malloc(N*sizeof(float));
+	float* aux;
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valor = malloc(sizeof(float));
-	int i;
+	int i, convergeLocal=1, convergeGlobal=0;
 	srand(time(NULL));
     //Inicializa el vector con numeros random
     for(i=0;i<N;i++){
@@ -20,19 +21,31 @@ void funcionA(){
     }
 	part = malloc(partes*sizeof(float));
 	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	MPI_Recv(valor[0], sizeof(float), MPI_FLOAT, id+1, 30, MPI_COMM_WORLD); 
-	MPI_Send(part[partes-1], sizeof(float), MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
-	//hacer calculos
-	auxVec[0]=(vec[0]+vec[1])*0.5;
-	for (i=1;i<partes-2;i++){
-		auxVec[i]=(vec[i-1]+vec[i]+vec[i+1])*tercio;
+	while(convergeGlobal == 0){
+		MPI_Recv(valor[0], sizeof(float), MPI_FLOAT, id+1, 30, MPI_COMM_WORLD); 
+		MPI_Send(part[partes-1], sizeof(float), MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
+		//hacer calculos
+		auxVec[0]=(part[0]+part[1])*0.5;
+		for (i=1;i<partes-1;i++){
+			auxVec[i]=(part[i-1]+part[i]+part[i+1])*tercio;
+		}
+		auxVec[partes-1] = (part[partes-2]+part[partes-1]+valor[0])*tercio;
+		//enviar primer valor a todos
+		MPI_BCast(auxVec[0], 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+		//hacer las comparaciones
+		for (i=0;i<partes-1;i++){
+			if (fabs(auxVec[0]-auxVec[i])>0.01){
+				convergeLocal=0;
+				break;
+			}
+		}
+		aux = part;
+		part = auxVec;
+		auxVec = aux;
+		//reduccion
+		MPI_Allreduce(&convergeLocal, &convergeGlobal, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
 	}
-	auxVec[partes-1] = (vec[partes-2]+vec[partes-1]+valor[0])*tercio;
-	//enviar primer valor a todos
-	MPI_BCast(auxVec[0], 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	//hacer las comparaciones
-	
-	//reduccion
+	MPI_Gather(part, partes, MPI_FLOAT, vec, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 }
 
 void funcionB(int id){
