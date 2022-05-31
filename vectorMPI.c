@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <time.h>
 
+double dwalltime();
 int N; //tamaño del vector
 float *vec, *part;
 float tercio=1.0/3.0;
@@ -21,11 +22,12 @@ void funcionA(int id){
     //Inicializa el vector con numeros random
     for(i=0;i<N;i++){
        vec[i]=(float)rand()/(float)(RAND_MAX/1);
-       printf("%f\n",vec[i]);
+       //printf("%f\n",vec[i]);
     }
 	part = malloc(partes*sizeof(float));
 	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	while(convergeGlobal == 0){
+		convergeLocal=1;
 		MPI_Recv( &valor[0], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
 		//hacer calculos
@@ -58,8 +60,10 @@ void funcionB(int id,int T){
 	part = malloc(partes*sizeof(float));
 	int i, convergeLocal=1, convergeGlobal=0;
 	float v0, *aux;
+	int iteraciones=0;
 	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
   while(convergeGlobal==0){
+  	convergeLocal=1;
 	if (id!=T-1){
 		MPI_Recv(&valores[1], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
@@ -96,7 +100,6 @@ void funcionB(int id,int T){
 	aux = part;
 	part = auxVec;
 	auxVec = aux;
-
 	//reduccion
 	MPI_Allreduce(&convergeLocal, &convergeGlobal, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
   }
@@ -107,7 +110,8 @@ void funcionB(int id,int T){
 int main(int argc, char** argv){
 	int miID;
 	int T; //cantidad de procesos
-
+	double timetick;
+	timetick=dwalltime();
 	MPI_Init(&argc, &argv); // Inicializa el ambiente. No debe haber sentencias antes
 	MPI_Comm_rank(MPI_COMM_WORLD,&miID); // Obtiene el identificador de cada proceso (rank)
 	MPI_Comm_size(MPI_COMM_WORLD,&T); // Obtiene el numero de procesos
@@ -115,7 +119,16 @@ int main(int argc, char** argv){
 	partes = N/T;
 	if (miID == 0) funcionA(miID);
 	else funcionB(miID,T);
-
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
+	printf("\nTiempo en segundos: %f\n", dwalltime()-timetick);
 	return(0); // Luego del MPI_Finalize()
 	}
+
+double dwalltime(){
+        double sec;
+        struct timeval tv;
+
+        gettimeofday(&tv,NULL);
+        sec = tv.tv_sec + tv.tv_usec/1000000.0;
+        return sec;
+}
