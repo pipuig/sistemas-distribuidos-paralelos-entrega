@@ -1,13 +1,17 @@
-#include<mpi.h>
-#include<math.h>
-#include<time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <mpi.h>
+#include <math.h>
+#include <sys/time.h>
+#include <time.h>
 
+int N; //tamaño del vector
 float *vec, *part;
 float tercio=1.0/3.0;
 int partes;
 
 
-void funcionA(){
+void funcionA(int id){
 	vec = malloc(N*sizeof(float));
 	float* aux;
 	float* auxVec = malloc(partes*sizeof(float));
@@ -22,8 +26,8 @@ void funcionA(){
 	part = malloc(partes*sizeof(float));
 	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	while(convergeGlobal == 0){
-		MPI_Recv(valor[0], sizeof(float), MPI_FLOAT, id+1, 30, MPI_COMM_WORLD); 
-		MPI_Send(part[partes-1], sizeof(float), MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
+		MPI_Recv( &valor[0], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
 		//hacer calculos
 		auxVec[0]=(part[0]+part[1])*0.5;
 		for (i=1;i<partes-1;i++){
@@ -31,7 +35,7 @@ void funcionA(){
 		}
 		auxVec[partes-1] = (part[partes-2]+part[partes-1]+valor[0])*tercio;
 		//enviar primer valor a todos
-		MPI_BCast(auxVec[0], 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&auxVec[0], 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
 		//hacer las comparaciones
 		for (i=0;i<partes-1;i++){
 			if (fabs(auxVec[0]-auxVec[i])>0.01){
@@ -48,38 +52,61 @@ void funcionA(){
 	MPI_Gather(part, partes, MPI_FLOAT, vec, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 }
 
-void funcionB(int id){
+void funcionB(int id,int T){
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valores = malloc(2*sizeof(float));
 	part = malloc(partes*sizeof(float));
+	int i, convergeLocal=1, convergeGlobal=0;
+	float v0, *aux;
 	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
+  while(convergeGlobal==0){
 	if (id!=T-1){
-		MPI_Recv(valores[1], sizeof(float), MPI_FLOAT, id+1, 30, MPI_COMM_WORLD); 
-		MPI_Send(part[partes-1], sizeof(float), MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
-		MPI_Send(part[0], sizeof(float), MPI_FLOAT, id-1, 30, MPI_COMM_WORLD); 
-		MPI_Recv(valores[0], sizeof(float), MPI_FLOAT, id-1, 31, MPI_COMM_WORLD);
+		MPI_Recv(&valores[1], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
+		MPI_Send(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
+		MPI_Recv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 	}
 	else {
-		MPI_Send(part[0], sizeof(float), MPI_FLOAT, id-1, 30, MPI_COMM_WORLD); 
-		MPI_Recv(valores[0], sizeof(float), MPI_FLOAT, id-1, 31, MPI_COMM_WORLD);
+		MPI_Send(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
+		MPI_Recv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 	}
 	//hacer calculos
+	auxVec[0]=(valores[0]+part[0]+part[1])*tercio;
+	for (i=1;i<partes-1;i++){
+		auxVec[i]=(part[i-1]+part[i]+part[i+1])*tercio;
+	}
+
+	if(id != T-1){ //si no es es el ultimo thread hace el promedio de 3 posiciones
+		auxVec[partes-1] = (part[partes-2]+part[partes-1]+valores[1])*tercio;
+	}else{
+		auxVec[partes-1] = (part[partes-2]+part[partes-1])*0.5;
+	}
+
 	//recibir primer valor
+	MPI_Bcast(&v0, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	//hacer las comparaciones
+	for (i=0;i<partes-1;i++){
+		if (fabs(v0-auxVec[i])>0.01){
+			convergeLocal=0;
+			break;
+		}
+	}
+
+	//swap
+	aux = part;
+	part = auxVec;
+	auxVec = aux;
+
 	//reduccion
+	MPI_Allreduce(&convergeLocal, &convergeGlobal, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+  }
+	MPI_Gather(part, partes, MPI_FLOAT, vec, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 }
-
-
-
-
-
-
 
 
 int main(int argc, char** argv){
 	int miID;
 	int T; //cantidad de procesos
-	int N; //tamaño del vector
 
 	MPI_Init(&argc, &argv); // Inicializa el ambiente. No debe haber sentencias antes
 	MPI_Comm_rank(MPI_COMM_WORLD,&miID); // Obtiene el identificador de cada proceso (rank)
@@ -87,11 +114,8 @@ int main(int argc, char** argv){
 	N= atoi(argv[1]);
 	partes = N/T;
 	if (miID == 0) funcionA(miID);
-	else funcionB(miID);
+	else funcionB(miID,T);
 
-
-	/*if(miID == 0) funcionA(); // Función que implementa el root
-	else if (miID >= 1 && miID <= K) funcionB(); // Función que implementa los procesos de tipo B*/
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
 	return(0); // Luego del MPI_Finalize()
 	}
