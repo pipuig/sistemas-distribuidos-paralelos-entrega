@@ -42,7 +42,7 @@ void funcionA(int id){
 		//hacer las comparaciones
 		for (i=0;i<partes-1;i++){
 			if (fabs(auxVec[0]-auxVec[i])>0.01){
-				MPI_Scatter(M, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);convergeLocal=0;
+				convergeLocal=0;
 				break;
 			}
 		}

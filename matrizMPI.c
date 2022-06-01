@@ -6,6 +6,7 @@
 #include <time.h>
 #define NUM_IT 1000000
 
+double dwalltime();
 int N; //tamaño de la matriz
 float *M, *part;
 float tercio=1.0/3.0;
@@ -213,7 +214,8 @@ void funcionB(int id,int T){
 int main(int argc, char** argv){
 	int miID;
 	int T; //cantidad de procesos
-
+  double timetick;
+	timetick=dwalltime();
 	MPI_Init(&argc, &argv); // Inicializa el ambiente. No debe haber sentencias antes
 	MPI_Comm_rank(MPI_COMM_WORLD,&miID); // Obtiene el identificador de cada proceso (rank)
 	MPI_Comm_size(MPI_COMM_WORLD,&T); // Obtiene el numero de procesos
@@ -223,5 +225,15 @@ int main(int argc, char** argv){
 	else funcionB(miID,T);
 
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
+	printf("\nTiempo en segundos: %f\n", dwalltime()-timetick);
 	return(0); // Luego del MPI_Finalize()
+	}
+
+	double dwalltime(){
+	        double sec;
+	        struct timeval tv;
+
+	        gettimeofday(&tv,NULL);
+	        sec = tv.tv_sec + tv.tv_usec/1000000.0;
+	        return sec;
 	}
