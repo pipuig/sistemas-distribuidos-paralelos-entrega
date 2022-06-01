@@ -30,7 +30,7 @@ void funcionA(int id){
 
 	MPI_Scatter(M, partes*N, MPI_FLOAT, part, partes*N, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
-	while(convergeGlobal == 0 && iteraciones<NUM_IT){
+	while(convergeGlobal == 0){
 		convergeLocal=1;
 
 		//mandar fila al siguiente thread
