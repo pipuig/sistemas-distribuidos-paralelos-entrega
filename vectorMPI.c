@@ -15,17 +15,18 @@ int partes;
 void funcionA(int id){
 	vec = malloc(N*sizeof(float));
 	float* aux;
+	double timetick;
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valor = malloc(sizeof(float));
 	int i, convergeLocal=1, convergeGlobal=0;
-	srand(time(NULL));
+	//srand(time(NULL));
     //Inicializa el vector con numeros random
     for(i=0;i<N;i++){
        vec[i]=(float)rand()/(float)(RAND_MAX/1);
-       //
-       printf("%f\n",vec[i]);
+       //printf("%f\n",vec[i]);
     }
 	part = malloc(partes*sizeof(float));
+	timetick=dwalltime();
 	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	while(convergeGlobal == 0){
 		convergeLocal=1;
@@ -53,6 +54,7 @@ void funcionA(int id){
 		MPI_Allreduce(&convergeLocal, &convergeGlobal, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
 	}
 	MPI_Gather(part, partes, MPI_FLOAT, vec, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	printf("Tiempo: %lf\n", dwalltime()-timetick);
 }
 
 void funcionB(int id,int T){
@@ -111,17 +113,15 @@ void funcionB(int id,int T){
 int main(int argc, char** argv){
 	int miID;
 	int T; //cantidad de procesos
-	double timetick;
-	timetick=dwalltime();
 	MPI_Init(&argc, &argv); // Inicializa el ambiente. No debe haber sentencias antes
 	MPI_Comm_rank(MPI_COMM_WORLD,&miID); // Obtiene el identificador de cada proceso (rank)
 	MPI_Comm_size(MPI_COMM_WORLD,&T); // Obtiene el numero de procesos
 	N= atoi(argv[1]);
+	printf("Threads: %d - N: %d\n", T,N);
 	partes = N/T;
 	if (miID == 0) funcionA(miID);
 	else funcionB(miID,T);
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
-	printf("\nTiempo en segundos: %f\n", dwalltime()-timetick);
 	return(0); // Luego del MPI_Finalize()
 	}
 

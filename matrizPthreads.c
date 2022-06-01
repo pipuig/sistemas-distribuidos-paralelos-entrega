@@ -88,15 +88,15 @@ void* funcion(void *arg){
         for (i=posInicio;i<posFinal;i++){
             mat[i*N] = (M[(i-1)*N] + M[(i-1)*N+1]
                         + M[i*N] + M[i*N+1] +
-                        M[(i+1)*N] + M[(i+1)*N+1])/6;
+                        M[(i+1)*N] + M[(i+1)*N+1])*sexto;
             for(j=1;j<N-1;j++){
                mat[i*N+j] = (M[(i-1)*N+(j-1)] + M[(i-1)*N+j] + M[(i-1)*N+j+1]
                           + M[(i)*N+(j-1)] + M[(i)*N+j] + M[(i)*N+j+1]
-                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])/9;
+                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])*noveno;
             }
             mat[(i+1)*N-1] = (M[(i-1)*N + (N-2)] + M[(i-1)*N + (N-1)]
                            + M[i*N + (N-2)] + M[i*N + (N-1)]
-                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])/6;
+                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])*sexto;
         }
       }
 
