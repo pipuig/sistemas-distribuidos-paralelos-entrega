@@ -9,7 +9,7 @@
 double dwalltime();
 int N; //tamaño de la matriz
 float *M, *part;
-float tercio=1.0/3.0;
+float tercio=1.0/3.0, noveno=1.0/9.0, sexto=1.0/6.0;
 int partes;
 
 
@@ -44,7 +44,7 @@ void funcionA(int id){
 						part[N]+part[N+1])/4;
 		//hacer lo del medio
 		for (i=1;i<N-1;i++){
-				auxM[i] = (part[i-1] + part[i] + part[i+1] + part[i-1+N] + part[i+N] + part[i+1+N])/6; //chequear si converge
+				auxM[i] = (part[i-1] + part[i] + part[i+1] + part[i-1+N] + part[i+N] + part[i+1+N])*sexto; //chequear si converge
 		}
 		//hacer otra esquina
 		auxM[N-1] = (part[N-1] + part[N-2] + part[(2*N)-2] + part[(2*N)-1])/4;
@@ -52,30 +52,30 @@ void funcionA(int id){
 		for (i=1;i<partes-1;i++){
 				auxM[i*N] = (part[(i-1)*N] + part[(i-1)*N+1]
 										+ part[i*N] + part[i*N+1] +
-										part[(i+1)*N] + part[(i+1)*N+1])/6;
+										part[(i+1)*N] + part[(i+1)*N+1])*sexto;
 				for(j=1;j<N-1;j++){
 					 auxM[i*N+j] = (part[(i-1)*N+(j-1)] + part[(i-1)*N+j] + part[(i-1)*N+j+1]
 											+ part[(i)*N+(j-1)] + part[(i)*N+j] + part[(i)*N+j+1]
-											+ part[(i+1)*N+(j-1)] + part[(i+1)*N+j] + part[(i+1)*N+j+1])/9;
+											+ part[(i+1)*N+(j-1)] + part[(i+1)*N+j] + part[(i+1)*N+j+1])*noveno;
 				}
 				auxM[(i+1)*N-1] = (part[(i-1)*N + (N-2)] + part[(i-1)*N + (N-1)]
 											 + part[i*N + (N-2)] + part[i*N + (N-1)]
-											 + part[(i+1)*N + (N-2)] + part[(i+1)*N + (N-1)])/6;
+											 + part[(i+1)*N + (N-2)] + part[(i+1)*N + (N-1)])*sexto;
 		}
 
 		//necesito la fila siguiente
 		i=partes-1;
 		auxM[i*N] = (part[(i-1)*N] + part[(i-1)*N+1]
 								+ part[i*N] + part[i*N+1] +
-								filaSig[0] + filaSig[1])/6;
+								filaSig[0] + filaSig[1])*sexto;
 		for(j=1;j<N-1;j++){
 		  auxM[i*N+j] = (part[(i-1)*N+(j-1)] + part[(i-1)*N+j] + part[(i-1)*N+j+1]
 				  					+ part[(i)*N+(j-1)] + part[(i)*N+j] + part[(i)*N+j+1]
-			  						+ filaSig[(j-1)] + filaSig[j] + filaSig[j+1])/9;
+			  						+ filaSig[(j-1)] + filaSig[j] + filaSig[j+1])*noveno;
 		}
 		auxM[(i+1)*N-1] = (part[(i-1)*N + (N-2)] + part[(i-1)*N + (N-1)]
 									 + part[i*N + (N-2)] + part[i*N + (N-1)]
-									 + filaSig[N-2] + filaSig[N-1])/6;
+									 + filaSig[N-2] + filaSig[N-1])*sexto;
     //printf("hilo %d numero %f \n",id,auxM[N]);
 		//enviar primer valor a todos
 	  MPI_Bcast(&auxM[0], 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
@@ -130,29 +130,29 @@ void funcionB(int id,int T){
 
 	auxM[0] = (filaAnt[0] + filaAnt[1]
 							+ part[0] + part[1] +
-							part[N] + part[N+1])/6;
+							part[N] + part[N+1])*sexto;
 	for(j=1;j<N-1;j++){
 		 auxM[j] = (filaAnt[j-1] + filaAnt[j] + filaAnt[j+1]
 	    							+ part[(j-1)] + part[j] + part[j+1]
-		       					+ part[N+(j-1)] + part[N+j] + part[N+j+1])/9;
+		       					+ part[N+(j-1)] + part[N+j] + part[N+j+1])*noveno;
 	}
 	auxM[N-1] = (filaAnt[N-2] + filaAnt[N-1]
 								 + part[N-2] + part[N-1]
-								 + part[2*N -2] + part[2*N -1])/6;
+								 + part[2*N -2] + part[2*N -1])*sexto;
 
 	//hagos los bloques que me tocan del for
 	for (i=1;i<partes-1;i++){
 			auxM[i*N] = (part[(i-1)*N] + part[(i-1)*N+1]
 									+ part[i*N] + part[i*N+1] +
-									part[(i+1)*N] + part[(i+1)*N+1])/6;
+									part[(i+1)*N] + part[(i+1)*N+1])*sexto;
 			for(j=1;j<N-1;j++){
 				 auxM[i*N+j] = (part[(i-1)*N+(j-1)] + part[(i-1)*N+j] + part[(i-1)*N+j+1]
 										+ part[(i)*N+(j-1)] + part[(i)*N+j] + part[(i)*N+j+1]
-										+ part[(i+1)*N+(j-1)] + part[(i+1)*N+j] + part[(i+1)*N+j+1])/9;
+										+ part[(i+1)*N+(j-1)] + part[(i+1)*N+j] + part[(i+1)*N+j+1])*noveno;
 			}
 			auxM[(i+1)*N-1] = (part[(i-1)*N + (N-2)] + part[(i-1)*N + (N-1)]
 										 + part[i*N + (N-2)] + part[i*N + (N-1)]
-										 + part[(i+1)*N + (N-2)] + part[(i+1)*N + (N-1)])/6;
+										 + part[(i+1)*N + (N-2)] + part[(i+1)*N + (N-1)])*sexto;
 	}
 
   if(id != T-1){ //si no soy el ultimo hilo
@@ -160,15 +160,15 @@ void funcionB(int id,int T){
 		i=partes-1;
 		auxM[i*N] = (part[(i-1)*N] + part[(i-1)*N+1]
 								+ part[i*N] + part[i*N+1] +
-								filaSig[0] + filaSig[1])/6;
+								filaSig[0] + filaSig[1])*sexto;
 		for(j=1;j<N-1;j++){
 		  auxM[i*N+j] = (part[(i-1)*N+(j-1)] + part[(i-1)*N+j] + part[(i-1)*N+j+1]
 				  					+ part[(i*N)+(j-1)] + part[(i*N)+j] + part[(i*N)+j+1]
-			  						+ filaSig[(j-1)] + filaSig[j] + filaSig[j+1])/9;
+			  						+ filaSig[(j-1)] + filaSig[j] + filaSig[j+1])*noveno;
 		}
 		auxM[(i+1)*N-1] = (part[(i-1)*N + (N-2)] + part[(i-1)*N + (N-1)]
 									 + part[i*N + (N-2)] + part[i*N + (N-1)]
-									 + filaSig[N-2] + filaSig[N-1])/6;
+									 + filaSig[N-2] + filaSig[N-1])*sexto;
 
 	}else{
 		//si soy el ultimo hilo
@@ -176,7 +176,7 @@ void funcionB(int id,int T){
 		auxM[(partes-1)*N] = (part[(partes-1)*N] + part[(partes-1)*N+1] + part[(partes-2)*N] + part[N*(partes-2)+1] )/4;
 		//hago lo del medio
 		for(i=(partes-1)*N+1;i<partes*N;i++){
-			auxM[i] = (part[i-1] + part[i] + part[i+1] + part[i-1-N] + part[i-N] + part[i+1-N])/6; //chequear si converge
+			auxM[i] = (part[i-1] + part[i] + part[i+1] + part[i-1-N] + part[i-N] + part[i+1-N])*sexto; //chequear si converge
 		}
 		//hago la ultima esquina
 		auxM[(partes*N)-1] = (part[(partes*N)-1] + part[(partes-1)*N-1] + part[(partes-1)*N-2]

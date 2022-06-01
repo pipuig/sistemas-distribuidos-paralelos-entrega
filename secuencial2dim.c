@@ -6,6 +6,7 @@
 
 double dwalltime();
 int iteraciones =0;
+float tercio=1.0/3.0, sexto=1.0/6.0, noveno=1.0/9.0;
 
 
 
@@ -23,34 +24,34 @@ void secuencialDosDim(float* M, int N){
         converge = 1;
         mat[0] = (M[0] + M[1] + M[N] + M[N+1])/4; //esquina izquierda superior
         for (i=1;i<N-1;i++){
-            mat[i] = (M[i-1] + M[i] + M[i+1] + M[i-1+N] + M[i+N] + M[i+1+N])/6; //desde [0][1] a [0][N-1]
+            mat[i] = (M[i-1] + M[i] + M[i+1] + M[i-1+N] + M[i+N] + M[i+1+N])*sexto; //desde [0][1] a [0][N-1]
         }
-        mat[N-1] = (M[N-1] + M[N-2] + M[(2*N)-2] + M[(2*N)-1])/4; //esquina superior derecha
+        mat[N-1] = (M[N-1] + M[N-2] + M[(2*N)-2] + M[(2*N)-1])*0.25; //esquina superior derecha
 
         for (i=1;i<N-1;i++){
             //primer elemento de cada fila
             mat[i*N] = (M[(i-1)*N] + M[(i-1)*N+1]
                         + M[i*N] + M[i*N+1] +
-                        M[(i+1)*N] + M[(i+1)*N+1])/6;
+                        M[(i+1)*N] + M[(i+1)*N+1])*sexto;
             //hasta llegar al ultimo elemento de la fila
             for(j=1;j<N-1;j++){
                mat[i*N+j] = (M[(i-1)*N+(j-1)] + M[(i-1)*N+j] + M[(i-1)*N+j+1]
                           + M[(i)*N+(j-1)] + M[(i)*N+j] + M[(i)*N+j+1]
-                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])/9;
+                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])*noveno;
             }
             //ultimo elemento de fila
             mat[(i+1)*N-1] = (M[(i-1)*N + (N-2)] + M[(i-1)*N + (N-1)]
                            + M[i*N + (N-2)] + M[i*N + (N-1)]
-                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])/6;
+                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])*sexto;
         }
         //esquina inferior izquierda
-        mat[N*(N-1)] = (M[N*(N-1)] + M[N*(N-2)] + M[N*(N-2)+1] + M[N*(N-1)+1])/4;
+        mat[N*(N-1)] = (M[N*(N-1)] + M[N*(N-2)] + M[N*(N-2)+1] + M[N*(N-1)+1])*0.25;
 
         for (i=(N-1)*N +1 ; i<N*N -1 ;i++){
-            mat[i] = (M[i-1] + M[i] + M[i+1] + M[i-1-N] + M[i-N] + M[i+1-N])/6; //chequear si converge
+            mat[i] = (M[i-1] + M[i] + M[i+1] + M[i-1-N] + M[i-N] + M[i+1-N])*sexto; //chequear si converge
         }
         //esquina inferior derecha
-        mat[N*N-1] = (M[N*N-1] + M[N*(N-1)-1] + M[N*(N-1)-2] + M[N*N-2])/4;
+        mat[N*N-1] = (M[N*N-1] + M[N*(N-1)-1] + M[N*(N-1)-2] + M[N*N-2])*0.25;
 
         for (i=0;i<N*N;i++){
             if (fabs(mat[0] - mat[i]) > 0.01){
@@ -76,7 +77,7 @@ void secuencialDosDim(float* M, int N){
 
 int main(int argc, char *argv[]){
    int N = atoi(argv[1]);
-   srand(time(NULL));
+   //srand(time(NULL));
    double timetick;
    float a;
    int i;
@@ -86,7 +87,7 @@ int main(int argc, char *argv[]){
    }
     timetick = dwalltime();
     secuencialDosDim(matriz, N);
-    printf("\ntiempo en segundos %f con %d iteraciones\n", dwalltime()-timetick, iteraciones);
+    printf("\nN:%d\ntiempo en segundos %f con %d iteraciones\n",N, dwalltime()-timetick, iteraciones);
     free(matriz);
     return 0;
 }

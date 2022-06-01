@@ -8,14 +8,14 @@
 
 float *M,*mat,*auxSwap;
 int N,pos,T, convergeGlobal=0,*convergeVec, iteraciones=0;
-const float tercio = 1.0/3.0;
+const float tercio = 1.0/3.0, sexto=1.0/6.0, noveno=1.0/9.0;
 
 pthread_barrier_t barrera;
 
 
 void* funcion(void *arg){
   int tid=*(int*)arg;
-  printf("Hilo id:%d\n",tid);
+  //printf("Hilo id:%d\n",tid);
   int i,j;
   float primero;
   int posInicio=pos*(tid);
@@ -27,7 +27,7 @@ void* funcion(void *arg){
   while(convergeGlobal == 0){
 
       primero=(M[0]+M[1]+
-              M[N]+M[N+1])/4;
+              M[N]+M[N+1])*0.25;
       convergeVec[tid]=1;
 
 
@@ -35,25 +35,25 @@ void* funcion(void *arg){
         mat[0] = primero;
         //hago lo del medio
         for (i=1;i<N-1;i++){
-            mat[i] = (M[i-1] + M[i] + M[i+1] + M[i-1+N] + M[i+N] + M[i+1+N])/6; //chequear si converge
+            mat[i] = (M[i-1] + M[i] + M[i+1] + M[i-1+N] + M[i+N] + M[i+1+N])*sexto; //chequear si converge
         }
         //hago la esquina derecha superior
-        mat[N-1] = (M[N-1] + M[N-2] + M[(2*N)-2] + M[(2*N)-1])/4;
+        mat[N-1] = (M[N-1] + M[N-2] + M[(2*N)-2] + M[(2*N)-1])*0.25;
 
 
         //hago los bloques que me tocan en for
         for (i=posInicio;i<posFinal;i++){
             mat[i*N] = (M[(i-1)*N] + M[(i-1)*N+1]
                         + M[i*N] + M[i*N+1] +
-                        M[(i+1)*N] + M[(i+1)*N+1])/6;
+                        M[(i+1)*N] + M[(i+1)*N+1])*sexto;
             for(j=1;j<N-1;j++){
                mat[i*N+j] = (M[(i-1)*N+(j-1)] + M[(i-1)*N+j] + M[(i-1)*N+j+1]
                           + M[(i)*N+(j-1)] + M[(i)*N+j] + M[(i)*N+j+1]
-                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])/9;
+                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])*noveno;
             }
             mat[(i+1)*N-1] = (M[(i-1)*N + (N-2)] + M[(i-1)*N + (N-1)]
                            + M[i*N + (N-2)] + M[i*N + (N-1)]
-                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])/6;
+                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])*sexto;
         }
       }
 
@@ -62,25 +62,25 @@ void* funcion(void *arg){
         for (i=posInicio;i<posFinal;i++){
             mat[i*N] = (M[(i-1)*N] + M[(i-1)*N+1]
                         + M[i*N] + M[i*N+1] +
-                        M[(i+1)*N] + M[(i+1)*N+1])/6;
+                        M[(i+1)*N] + M[(i+1)*N+1])*sexto;
             for(j=1;j<N-1;j++){
                mat[i*N+j] = (M[(i-1)*N+(j-1)] + M[(i-1)*N+j] + M[(i-1)*N+j+1]
                           + M[(i)*N+(j-1)] + M[(i)*N+j] + M[(i)*N+j+1]
-                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])/9;
+                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])*noveno;
             }
             mat[(i+1)*N-1] = (M[(i-1)*N + (N-2)] + M[(i-1)*N + (N-1)]
                            + M[i*N + (N-2)] + M[i*N + (N-1)]
-                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])/6;
+                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])*sexto;
         }
         //hago la esquina izquierda
-        mat[N*(N-1)] = (M[N*(N-1)] + M[N*(N-2)] + M[N*(N-2)+1] + M[N*(N-1)+1])/4;
+        mat[N*(N-1)] = (M[N*(N-1)] + M[N*(N-2)] + M[N*(N-2)+1] + M[N*(N-1)+1])*0.25;
         //hago lo del medio
         for (i=(N-1)*N +1 ; i<N*N -1 ;i++){
-            mat[i] = (M[i-1] + M[i] + M[i+1] + M[i-1-N] + M[i-N] + M[i+1-N])/6; //chequear si converge
+            mat[i] = (M[i-1] + M[i] + M[i+1] + M[i-1-N] + M[i-N] + M[i+1-N])*sexto; //chequear si converge
         }
         //hago la ultima esquina
         mat[N*N-1] = (M[N*N-1] + M[N*(N-1)-1]
-                   + M[N*(N-1)-2] + M[N*N-2])/4;
+                   + M[N*(N-1)-2] + M[N*N-2])*0.25;
       }
 
       if((tid != 0) && (tid != T-1)){
@@ -170,7 +170,7 @@ double dwalltime(){
   mat=(float*)malloc(sizeof(float)*N*N);
   convergeVec=(int*)malloc(sizeof(int)*T);
 
-  srand(time(NULL));
+  //srand(time(NULL));
     //Inicializa el vector con numeros random
     for(i=0;i<N*N;i++){
        M[i]=(float)rand()/(float)(RAND_MAX/1);
@@ -200,7 +200,7 @@ double dwalltime(){
  }
 
 
- printf("Tiempo en segundos en correr el algoritmo es %f con %d iteraciones\n", dwalltime() - timetick, iteraciones);
+ printf("N:%d\nTiempo en segundos en correr el algoritmo es %f con %d iteraciones\n",N, dwalltime() - timetick, iteraciones);
 
 //Elimino las barreras
 

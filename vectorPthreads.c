@@ -15,7 +15,7 @@ pthread_barrier_t barrera;
 
 void* funcion(void *arg){
   int tid=*(int*)arg;
-  printf("Hilo id:%d\n",tid);
+  //printf("Hilo id:%d\n",tid);
   int i;
 
   int posInicio=pos*(tid);
@@ -129,14 +129,14 @@ double dwalltime(){
   auxVec=(float*)malloc(sizeof(float)*N);
   convergeVec=(int*)malloc(sizeof(int)*T);
 
-  srand(time(NULL));
+  //srand(time(NULL));
     //Inicializa el vector con numeros random
     for(i=0;i<N;i++){
        A[i]=(float)rand()/(float)(RAND_MAX/1);
-       printf("%f\n",A[i]);
+       //printf("%f\n",A[i]);
 
     }
-    printf("\n");
+    //printf("\n");
 
     //Inicializa el vector converge
     for(i=0;i<T;i++){
@@ -158,7 +158,7 @@ double dwalltime(){
    pthread_join(misThreads[id],NULL);
  }
 
- printf("Tiempo en segundos en correr el algoritmo es %f con %d iteraciones\n", dwalltime() - timetick, iteraciones);
+ printf("Tamaño del vector: %d\nTiempo en segundos en correr el algoritmo es %f con %d iteraciones\n",N, dwalltime() - timetick, iteraciones);
 
 
 //Elimino las barreras

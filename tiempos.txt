@@ -1,0 +1,65 @@
+SECUENCIALES
+una dimension 512 1024 y 2048
+
+Tamaño del vector: 512
+tiempo en segundos 0.272593 con 127535 iteraciones
+
+Tamaño del vector: 1024
+tiempo en segundos 1.596553 con 439466 iteraciones
+
+Tamaño del vector: 2048
+tiempo en segundos 5.830507 con 835620 iteraciones
+
+dos dimensiones 512 1024 y 2048
+
+N:512
+tiempo en segundos 3.838534 con 1787 iteraciones
+
+N:1024
+tiempo en segundos 31.472832 con 3641 iteraciones
+
+N:2048
+tiempo en segundos 157.248217 con 4788 iteraciones
+
+PTHREADS
+2 threads
+
+una dimension 512 1024 y 2048
+Tamaño del vector: 512
+Tiempo en segundos en correr el algoritmo es 0.832186 con 127535 iteraciones
+Tamaño del vector: 1024
+Tiempo en segundos en correr el algoritmo es 2.834007 con 439466 iteraciones
+Tamaño del vector: 2048
+Tiempo en segundos en correr el algoritmo es 6.664530 con 835620 iteraciones
+
+dos dimensiones 512 1024 y 2048
+
+N:512
+Tiempo en segundos en correr el algoritmo es 2.217928 con 1787 iteraciones
+
+N:1024
+Tiempo en segundos en correr el algoritmo es 17.560442 con 3641 iteraciones
+
+N:2048
+Tiempo en segundos en correr el algoritmo es 85.456740 con 4788 iteraciones
+
+4 threads
+
+una dimension 512 1024 y 2048
+Tamaño del vector: 512
+Tiempo en segundos en correr el algoritmo es 1.497714 con 127535 iteraciones
+Tamaño del vector: 1024
+Tiempo en segundos en correr el algoritmo es 4.565323 con 439466 iteraciones
+Tamaño del vector: 2048
+Tiempo en segundos en correr el algoritmo es 8.774319 con 835620 iteraciones
+
+dos dimensiones 512 1024 y 2048
+
+N:512
+Tiempo en segundos en correr el algoritmo es 1.290627 con 1787 iteraciones
+
+N:1024
+Tiempo en segundos en correr el algoritmo es 9.954791 con 3641 iteraciones
+
+N:2048
+Tiempo en segundos en correr el algoritmo es 51.686228 con 4788 iteraciones
