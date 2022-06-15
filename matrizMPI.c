@@ -10,10 +10,9 @@ double dwalltime();
 int N; //tamaño de la matriz
 float *M, *part;
 float tercio=1.0/3.0, noveno=1.0/9.0, sexto=1.0/6.0;
-int partes;
 
 
-void funcionA(int id){
+void funcionA(int id, int partes){
 
 	M = (float *)malloc(N*N*sizeof(float));
 	float* aux;
@@ -105,7 +104,7 @@ void funcionA(int id){
   //printf("iteracion: %d \n",iteraciones);
 }
 
-void funcionB(int id,int T){
+void funcionB(int id,int T, int partes){
 	float* auxM = (float *)malloc(partes*N*sizeof(float));
 	part = (float *)malloc(partes*N*sizeof(float));
 	float* filaSig = (float *)malloc(N*sizeof(float));
@@ -221,9 +220,8 @@ int main(int argc, char** argv){
 	MPI_Comm_size(MPI_COMM_WORLD,&T); // Obtiene el numero de procesos
 	N= atoi(argv[1]);
 	printf("Threads: %d - N: %d\n", T,N);
-	partes = N/T;
-	if (miID == 0) funcionA(miID);
-	else funcionB(miID,T);
+	if (miID == 0) funcionA(miID, N/T);
+	else funcionB(miID,T, N/T);
 
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
 	

@@ -9,10 +9,9 @@ double dwalltime();
 int N; //tamaño del vector
 float *vec, *part;
 float tercio=1.0/3.0;
-int partes;
 
 
-void funcionA(int id){
+void funcionA(int id, int partes){
 	vec = malloc(N*sizeof(float));
 	float* aux;
 	double timetick;
@@ -73,7 +72,7 @@ void funcionA(int id){
 	printf("Tiempo: %lf\n", dwalltime()-timetick);
 }
 
-void funcionB(int id,int T){
+void funcionB(int id,int T, int partes){
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valores = malloc(2*sizeof(float)); //contiene primer y ultimo valor (externos, de otros procesos)
 	part = malloc(partes*sizeof(float));
@@ -161,9 +160,8 @@ int main(int argc, char** argv){
 	MPI_Comm_size(MPI_COMM_WORLD,&T); // Obtiene el numero de procesos
 	N= atoi(argv[1]);
 	printf("Threads: %d - N: %d\n", T,N);
-	partes = N/T;
-	if (miID == 0) funcionA(miID);
-	else funcionB(miID,T);
+	if (miID == 0) funcionA(miID, N/T);
+	else funcionB(miID,T, N/T);
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
 	return(0); // Luego del MPI_Finalize()
 	}
