@@ -46,13 +46,16 @@ void funcionA(int id){
 				convergeLocal=0;
 				break;
 				}
-			}
 		}
-		for (;i<partes-1,i++){
+
+		for (;i<partes-1,i++;){
 			auxVec[i]=(part[i-1]+part[i]+part[i+1])*tercio;
 		}
 
 		auxVec[partes-1] = (part[partes-2]+part[partes-1]+valor[0])*tercio;
+		if (convergeLocal && (fabs(auxVec[0]-auxVec[partes-1])>0.01)){
+			convergeLocal=0;
+		}
 		//hacer las comparaciones
 		/*for (i=0;i<partes-1;i++){
 			if (fabs(auxVec[0]-auxVec[i])>0.01){
@@ -120,13 +123,16 @@ void funcionB(int id,int T){
 	for (;i<partes-1;i++){
 		auxVec[i]=(part[i-1]+part[i]+part[i+1])*tercio;
 		}
-	}
 
 	if(id != T-1){ //si no es es el ultimo thread hace el promedio de 3 posiciones
 		auxVec[partes-1] = (part[partes-2]+part[partes-1]+valores[1])*tercio;
 	}else{
 		auxVec[partes-1] = (part[partes-2]+part[partes-1])*0.5;
 	}
+
+	if (convergeLocal && (fabs(v0-auxVec[partes-1])>0.01)){ //calculo convergencia al final
+		convergeLocal=0;
+		}
 
 	//hacer las comparaciones
 	/*for (i=0;i<partes-1;i++){

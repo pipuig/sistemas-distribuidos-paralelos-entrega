@@ -14,13 +14,14 @@ A hacer:
 - [X] La estrategia paralela no es la misma que la secuencial, esto es muy imporante. En mpi de 1 dimension calculan convergencia al final cuando en el secuencial calculan mientras van procesando.  
 
 - [X] En pthreads solo el root deberia hacer swap de las matrices, no todos.
+*le erro el profe*
 
 - [X] En pthreads tienen tres if que podrian utilzar con else para que no haga todos los chequeos en todas las iteraciones
 
 - [X] En MPI hacen los receives antes que los sends excepto en uno de los procesos “para que no haya deadlock”, creo que los sends no son sincronicos por lo que eso no seria necesario, pero si asi fueran podrian ahorrarse ese overhead si utilizaran ISend con un wait. ** preguntar si asi esta bien o hay que hacerlo si o si con isend **
 
 
-- [ ] En MPI uilizan variables globales, esto esta mal, deberian pasar como parametro las variables que necesiten las funciones. ** hay que pasar la variable partes N/T como parametro **
+- [ ] En MPI uilizan variables globales, esto esta mal, deberian pasar como parametro las variables que necesiten las funciones. * hay que pasar la variable partes N/T como parametro *
 
 - [ ] Podrían incluir una validacion en el informe indicando por ejemplo la cantidad de iteraciones de cada algoritmo
 
