@@ -11,17 +11,17 @@
 
 double dwalltime();
 //int N; //tamaño de la matriz
-float *M, *part;
+//float *M, *part;
 //float tercio=1.0/3.0, noveno=1.0/9.0, sexto=1.0/6.0;
 
 
 void funcionA(int id, int N, int T){
 	int partes = N/T;
-	M = (float *)malloc(N*N*sizeof(float));
+	float *M = (float *)malloc(N*N*sizeof(float));
 	float* aux;
 	double timetick;
 	float* auxM = (float *) malloc(partes*N*sizeof(float));
-	part = (float *) malloc(partes*N*sizeof(float));
+	float *part = (float *) malloc(partes*N*sizeof(float));
 	float* filaSig = (float *) malloc(N*sizeof(float));
 	int i,j,iteraciones=0, convergeLocal=1, convergeGlobal=0;
 	//srand(time(NULL));
@@ -110,12 +110,12 @@ void funcionA(int id, int N, int T){
 void funcionB(int id,int N, int T){
 	int partes = N/T;
 	float* auxM = (float *)malloc(partes*N*sizeof(float));
-	part = (float *)malloc(partes*N*sizeof(float));
+	float* part = (float *)malloc(partes*N*sizeof(float));
 	float* filaSig = (float *)malloc(N*sizeof(float));
 	float* filaAnt = (float *)malloc(N*sizeof(float));
 	int i,j ,convergeLocal=1, convergeGlobal=0;
 	float v0, *aux;
-	MPI_Scatter(M, partes*N, MPI_FLOAT, part, partes*N, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Scatter(NULL, 0, MPI_FLOAT, part, partes*N, MPI_FLOAT, 0, MPI_COMM_WORLD);
   while(convergeGlobal==0){
   	convergeLocal=1;
 
@@ -212,7 +212,7 @@ void funcionB(int id,int N, int T){
 	//reduccion
 	MPI_Allreduce(&convergeLocal, &convergeGlobal, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
   }
-	MPI_Gather(part, partes*N, MPI_FLOAT, M, partes*N, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Gather(part, partes*N, MPI_FLOAT, NULL, 0, MPI_FLOAT, 0, MPI_COMM_WORLD);
 }
 
 
@@ -228,7 +228,7 @@ int main(int argc, char** argv){
 	else funcionB(miID,N, T);
 
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
-	
+
 	return(0); // Luego del MPI_Finalize()
 	}
 

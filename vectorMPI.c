@@ -7,12 +7,11 @@
 #define tercio (1.0/3.0)
 
 double dwalltime();
-float *vec, *part;
 //float tercio=1.0/3.0;
 
 
 void funcionA(int id, int N, int partes){
-	vec = malloc(N*sizeof(float));
+	float* vec = malloc(N*sizeof(float));
 	float* aux;
 	double timetick;
 	float* auxVec = malloc(partes*sizeof(float));
@@ -24,7 +23,7 @@ void funcionA(int id, int N, int partes){
        vec[i]=(float)rand()/(float)(RAND_MAX/1);
        //printf("%f\n",vec[i]);
     }
-	part = malloc(partes*sizeof(float));
+	float* part = malloc(partes*sizeof(float));
 	timetick=dwalltime();
 	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	while(convergeGlobal == 0){
@@ -76,11 +75,11 @@ void funcionB(int id,int T, int N){
 	int partes = N/T;
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valores = malloc(2*sizeof(float)); //contiene primer y ultimo valor (externos, de otros procesos)
-	part = malloc(partes*sizeof(float));
+	float* part = malloc(partes*sizeof(float));
 	int i, convergeLocal=1, convergeGlobal=0;
 	float v0, *aux;
 	int iteraciones=0;
-	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Scatter(NULL, 0, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
   while(convergeGlobal==0){
   	convergeLocal=1; //asumo que converge
 	//recibir primer valor
@@ -149,7 +148,7 @@ void funcionB(int id,int T, int N){
 	//reduccion
 	MPI_Allreduce(&convergeLocal, &convergeGlobal, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
   }
-	MPI_Gather(part, partes, MPI_FLOAT, vec, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
+	MPI_Gather(part, partes, MPI_FLOAT, NULL, 0, MPI_FLOAT, 0, MPI_COMM_WORLD);
 }
 
 
