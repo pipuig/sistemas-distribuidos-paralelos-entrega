@@ -127,12 +127,9 @@ void* funcion(void *arg){
           convergeGlobal=convergeGlobal && convergeVec[i];
           i++;
         }
-        pthread_barrier_wait(&barrera); //cuando terminan todos el proceso 0 swapea matrices
-        if (tid==0){
-          auxSwap=M;
-          M=mat;
-          mat=auxSwap;
-        }
+        auxSwap=M;
+        M=mat;
+        mat=auxSwap;
         iteraciones++;
 
         //printf("iteracion: %d \n",iteraciones);

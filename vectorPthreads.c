@@ -81,11 +81,9 @@ void* funcion(void *arg){
 
     iteraciones++;
     //necesito swapear los vectores para la proxima iteracion por eso uso un tercer puntero para hacer esto sino se me perderia la referencia
-    if (tid==0){ //se encarga el hilo 0
-        auxSwap=A;
-        A=auxVec;
-        auxVec=auxSwap;
-    }
+    auxSwap=A;
+    A=auxVec;
+    auxVec=auxSwap;
     //printf("iteracion: %d y i es %d\n",iteraciones,i);
 
     /*for(i=0;i<N;i++){
