@@ -5,15 +5,18 @@
 #include <sys/time.h>
 #include <time.h>
 #define NUM_IT 1000000
+#define tercio (1.0/3.0)
+#define sexto (1.0/6.0)
+#define noveno (1.0/9.0)
 
 double dwalltime();
-int N; //tamaño de la matriz
+//int N; //tamaño de la matriz
 float *M, *part;
-float tercio=1.0/3.0, noveno=1.0/9.0, sexto=1.0/6.0;
+//float tercio=1.0/3.0, noveno=1.0/9.0, sexto=1.0/6.0;
 
 
-void funcionA(int id, int partes){
-
+void funcionA(int id, int N, int T){
+	int partes = N/T;
 	M = (float *)malloc(N*N*sizeof(float));
 	float* aux;
 	double timetick;
@@ -104,7 +107,8 @@ void funcionA(int id, int partes){
   //printf("iteracion: %d \n",iteraciones);
 }
 
-void funcionB(int id,int T, int partes){
+void funcionB(int id,int N, int T){
+	int partes = N/T;
 	float* auxM = (float *)malloc(partes*N*sizeof(float));
 	part = (float *)malloc(partes*N*sizeof(float));
 	float* filaSig = (float *)malloc(N*sizeof(float));
@@ -214,14 +218,14 @@ void funcionB(int id,int T, int partes){
 
 int main(int argc, char** argv){
 	int miID;
-	int T; //cantidad de procesos
+	int T, N; //cantidad de procesos
 	MPI_Init(&argc, &argv); // Inicializa el ambiente. No debe haber sentencias antes
 	MPI_Comm_rank(MPI_COMM_WORLD,&miID); // Obtiene el identificador de cada proceso (rank)
 	MPI_Comm_size(MPI_COMM_WORLD,&T); // Obtiene el numero de procesos
 	N= atoi(argv[1]);
 	printf("Threads: %d - N: %d\n", T,N);
-	if (miID == 0) funcionA(miID, N/T);
-	else funcionB(miID,T, N/T);
+	if (miID == 0) funcionA(miID, N, T);
+	else funcionB(miID,N, T);
 
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
 	

@@ -4,14 +4,14 @@
 #include <math.h>
 #include <sys/time.h>
 #include <time.h>
+#define tercio (1.0/3.0)
 
 double dwalltime();
-int N; //tamaño del vector
 float *vec, *part;
-float tercio=1.0/3.0;
+//float tercio=1.0/3.0;
 
 
-void funcionA(int id, int partes){
+void funcionA(int id, int N, int partes){
 	vec = malloc(N*sizeof(float));
 	float* aux;
 	double timetick;
@@ -72,7 +72,8 @@ void funcionA(int id, int partes){
 	printf("Tiempo: %lf\n", dwalltime()-timetick);
 }
 
-void funcionB(int id,int T, int partes){
+void funcionB(int id,int T, int N){
+	int partes = N/T;
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valores = malloc(2*sizeof(float)); //contiene primer y ultimo valor (externos, de otros procesos)
 	part = malloc(partes*sizeof(float));
@@ -155,13 +156,14 @@ void funcionB(int id,int T, int partes){
 int main(int argc, char** argv){
 	int miID;
 	int T; //cantidad de procesos
+	int N;
 	MPI_Init(&argc, &argv); // Inicializa el ambiente. No debe haber sentencias antes
 	MPI_Comm_rank(MPI_COMM_WORLD,&miID); // Obtiene el identificador de cada proceso (rank)
 	MPI_Comm_size(MPI_COMM_WORLD,&T); // Obtiene el numero de procesos
 	N= atoi(argv[1]);
 	printf("Threads: %d - N: %d\n", T,N);
-	if (miID == 0) funcionA(miID, N/T);
-	else funcionB(miID,T, N/T);
+	if (miID == 0) funcionA(miID, N, N/T);
+	else funcionB(miID,T, N);
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
 	return(0); // Luego del MPI_Finalize()
 	}
