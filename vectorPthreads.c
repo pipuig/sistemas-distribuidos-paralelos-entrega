@@ -36,7 +36,7 @@ void* funcion(void *arg){
     //printf("auxvec: %f \n",auxVec[0]);
   }
 
-  if(tid == T-1){
+  else if(tid == T-1){
   //si soy el thread que hace el ultimo cacho, no quiero que el for lo haga porque tiene una formula aparte
     auxVec[N-1]=(A[N-2]+A[N-1])*0.5;
 
@@ -81,10 +81,11 @@ void* funcion(void *arg){
 
     iteraciones++;
     //necesito swapear los vectores para la proxima iteracion por eso uso un tercer puntero para hacer esto sino se me perderia la referencia
-    auxSwap=A;
-    A=auxVec;
-    auxVec=auxSwap;
-
+    if (tid==0){ //se encarga el hilo 0
+        auxSwap=A;
+        A=auxVec;
+        auxVec=auxSwap;
+    }
     //printf("iteracion: %d y i es %d\n",iteraciones,i);
 
     /*for(i=0;i<N;i++){

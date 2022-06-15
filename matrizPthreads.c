@@ -57,7 +57,7 @@ void* funcion(void *arg){
         }
       }
 
-      if (tid==T-1){ //ultimo thread hace ultima fila siempre
+      else if (tid==T-1){ //ultimo thread hace ultima fila siempre
         //hagos los bloques que me tocan del for
         for (i=posInicio;i<posFinal;i++){
             mat[i*N] = (M[(i-1)*N] + M[(i-1)*N+1]
@@ -83,20 +83,20 @@ void* funcion(void *arg){
                    + M[N*(N-1)-2] + M[N*N-2])*0.25;
       }
 
-      if((tid != 0) && (tid != T-1)){
+      else if((tid != 0) && (tid != T-1)){
         //si soy cualquier otro thread
         for (i=posInicio;i<posFinal;i++){
             mat[i*N] = (M[(i-1)*N] + M[(i-1)*N+1]
                         + M[i*N] + M[i*N+1] +
-                        M[(i+1)*N] + M[(i+1)*N+1])/6;
+                        M[(i+1)*N] + M[(i+1)*N+1])*sexto;
             for(j=1;j<N-1;j++){
                mat[i*N+j] = (M[(i-1)*N+(j-1)] + M[(i-1)*N+j] + M[(i-1)*N+j+1]
                           + M[(i)*N+(j-1)] + M[(i)*N+j] + M[(i)*N+j+1]
-                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])/9;
+                          + M[(i+1)*N+(j-1)] + M[(i+1)*N+j] + M[(i+1)*N+j+1])*noveno;
             }
             mat[(i+1)*N-1] = (M[(i-1)*N + (N-2)] + M[(i-1)*N + (N-1)]
                            + M[i*N + (N-2)] + M[i*N + (N-1)]
-                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])/6;
+                           + M[(i+1)*N + (N-2)] + M[(i+1)*N + (N-1)])*sexto;
         }
       }
 
@@ -127,11 +127,12 @@ void* funcion(void *arg){
           convergeGlobal=convergeGlobal && convergeVec[i];
           i++;
         }
-
-        auxSwap=M;
-        M=mat;
-        mat=auxSwap;
-
+        pthread_barrier_wait(&barrera); //cuando terminan todos el proceso 0 swapea matrices
+        if (tid==0){
+          auxSwap=M;
+          M=mat;
+          mat=auxSwap;
+        }
         iteraciones++;
 
         //printf("iteracion: %d \n",iteraciones);
