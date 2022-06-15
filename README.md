@@ -21,7 +21,7 @@ A hacer:
 - [X] En MPI hacen los receives antes que los sends excepto en uno de los procesos “para que no haya deadlock”, creo que los sends no son sincronicos por lo que eso no seria necesario, pero si asi fueran podrian ahorrarse ese overhead si utilizaran ISend con un wait. ** preguntar si asi esta bien o hay que hacerlo si o si con isend **
 
 
-- [ ] En MPI uilizan variables globales, esto esta mal, deberian pasar como parametro las variables que necesiten las funciones. * hay que pasar la variable partes N/T como parametro *
+- [X] En MPI uilizan variables globales, esto esta mal, deberian pasar como parametro las variables que necesiten las funciones. * hay que pasar la variable partes N/T como parametro *
 
 - [ ] Podrían incluir una validacion en el informe indicando por ejemplo la cantidad de iteraciones de cada algoritmo
 
