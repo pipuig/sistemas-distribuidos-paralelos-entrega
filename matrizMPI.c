@@ -23,6 +23,8 @@ void funcionA(int id, int N, int T){
 	float* auxM = (float *) malloc(partes*N*sizeof(float));
 	float *part = (float *) malloc(partes*N*sizeof(float));
 	float* filaSig = (float *) malloc(N*sizeof(float));
+	MPI_Request request;
+	MPI_Status status;
 	int i,j,iteraciones=0, convergeLocal=1, convergeGlobal=0;
 	//srand(time(NULL));
 
@@ -38,8 +40,9 @@ void funcionA(int id, int N, int T){
 		convergeLocal=1;
 
 		//mandar fila al siguiente thread
-		MPI_Recv(&filaSig[0], N, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-		MPI_Send(&part[(partes-1)*N], N, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
+		MPI_Isend(&part[(partes-1)*N], N, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD, &request);
+		MPI_Irecv(&filaSig[0], N, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD, &request);
+		MPI_Wait(&request, &status);
 		//hacer calculos de root, estos calculos se basan en que partes sea mayor a 2 sino se complican las cosas
 
 		//hacer esquina
@@ -115,19 +118,24 @@ void funcionB(int id,int N, int T){
 	float* filaAnt = (float *)malloc(N*sizeof(float));
 	int i,j ,convergeLocal=1, convergeGlobal=0;
 	float v0, *aux;
+	MPI_Request request;
+	MPI_Status status;
 	MPI_Scatter(NULL, 0, MPI_FLOAT, part, partes*N, MPI_FLOAT, 0, MPI_COMM_WORLD);
   while(convergeGlobal==0){
   	convergeLocal=1;
 
 	if (id!=T-1){
-		MPI_Recv(&filaSig[0], N, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-		MPI_Send(&part[(partes-1)*N], N, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
-		MPI_Send(&part[0], N, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
-		MPI_Recv(&filaAnt[0], N, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		MPI_Isend(&part[(partes-1)*N], N, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD, &request);
+		MPI_Isend(&part[0], N, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD, &request);
+		MPI_Irecv(&filaSig[0], N, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD, &request);
+		MPI_Wait(&request, &status);
+		MPI_Irecv(&filaAnt[0], N, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD, &request);
+		MPI_Wait(&request, &status);
 	}
 	else {
-		MPI_Send(&part[0], N, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
-		MPI_Recv(&filaAnt[0], N, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		MPI_Isend(&part[0], N, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD, &request);
+		MPI_Irecv(&filaAnt[0], N, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD, &request);
+		MPI_Wait(&request, &status);
 	}
 
 	//hacer calculos primero los que son comunes al ultimo y a los otros threads

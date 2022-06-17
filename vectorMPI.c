@@ -16,6 +16,8 @@ void funcionA(int id, int N, int partes){
 	double timetick;
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valor = malloc(sizeof(float));
+	MPI_Request request;
+	MPI_Status status;
 	int i, convergeLocal=1, convergeGlobal=0;
 	//srand(time(NULL));
     //Inicializa el vector con numeros random
@@ -31,8 +33,9 @@ void funcionA(int id, int N, int partes){
 		//enviar primer valor a todos
 		MPI_Bcast(&auxVec[0], 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
-		MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
-		MPI_Recv(&valor[0], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+		MPI_Isend(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD, &request);
+		MPI_Irecv(&valor[0], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD, &request);
+		MPI_Wait (&request, &status);//espero que finalice el receive
 
 		//MPI_Recv( &valor[0], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 		//MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
@@ -46,7 +49,7 @@ void funcionA(int id, int N, int partes){
 				}
 		}
 
-		for (;i<partes-1,i++;){
+		for (;i<partes-1;i++){
 			auxVec[i]=(part[i-1]+part[i]+part[i+1])*tercio;
 		}
 
@@ -78,27 +81,26 @@ void funcionB(int id,int T, int N){
 	float* part = malloc(partes*sizeof(float));
 	int i, convergeLocal=1, convergeGlobal=0;
 	float v0, *aux;
+	MPI_Request request;
+	MPI_Status status;
 	int iteraciones=0;
 	MPI_Scatter(NULL, 0, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
   while(convergeGlobal==0){
   	convergeLocal=1; //asumo que converge
 	//recibir primer valor
 	MPI_Bcast(&v0, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	if (id % 2 == 0 && id !=T-1){
-		MPI_Send(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
-		MPI_Recv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-		MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
-		MPI_Recv(&valores[1], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	if (id !=T-1){
+		MPI_Isend(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD, &request);
+		MPI_Isend(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD, &request);
+		MPI_Irecv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD, &request);
+		MPI_Wait(&request, &status); 
+		MPI_Irecv(&valores[1], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD, &request);
+		MPI_Wait(&request, &status);
 	}
-	else if (id % 2 == 1 && id != T-1) {
-		MPI_Recv(&valores[1], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-		MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
-		MPI_Recv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-		MPI_Send(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
-	}
-	else if (id == (T-1)){
-		MPI_Send(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
-		MPI_Recv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
+	else {
+		MPI_Isend(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD, &request);
+		MPI_Irecv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD, &request);
+		MPI_Wait(&request, &status);
 	}
 	/*if (id!=T-1){
 		MPI_Recv(&valores[1], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
