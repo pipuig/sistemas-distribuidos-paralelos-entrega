@@ -14,6 +14,7 @@ void funcionA(int id, int N, int partes){
 	float* vec = malloc(N*sizeof(float));
 	float* aux;
 	double timetick;
+	int iteraciones=0;
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valor = malloc(sizeof(float));
 	MPI_Request request;
@@ -72,6 +73,9 @@ void funcionA(int id, int N, int partes){
 	}
 	MPI_Gather(part, partes, MPI_FLOAT, vec, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	printf("Tiempo: %lf\n", dwalltime()-timetick);
+	/*for(i=0;i<N;i++){
+		printf("%lf\n", vec[i]);
+	}*/
 }
 
 void funcionB(int id,int T, int N){
