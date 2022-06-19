@@ -4,13 +4,10 @@
 #include <math.h>
 #include <sys/time.h>
 #include <time.h>
-#define tercio (1.0/3.0)
 
 double dwalltime();
-//float tercio=1.0/3.0;
 
-
-void funcionA(int id, int N, int partes){
+void funcionA(int id, int N, int partes, float tercio){
 	float* vec = malloc(N*sizeof(float));
 	float* aux;
 	double timetick;
@@ -20,11 +17,9 @@ void funcionA(int id, int N, int partes){
 	MPI_Request request;
 	MPI_Status status;
 	int i, convergeLocal=1, convergeGlobal=0;
-	//srand(time(NULL));
     //Inicializa el vector con numeros random
     for(i=0;i<N;i++){
        vec[i]=(float)rand()/(float)(RAND_MAX/1);
-       //printf("%f\n",vec[i]);
     }
 	float* part = malloc(partes*sizeof(float));
 	timetick=dwalltime();
@@ -37,10 +32,6 @@ void funcionA(int id, int N, int partes){
 		MPI_Isend(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD, &request);
 		MPI_Irecv(&valor[0], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD, &request);
 		MPI_Wait (&request, &status);//espero que finalice el receive
-
-		//MPI_Recv( &valor[0], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-		//MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
-		//hacer calculos
 		auxVec[0]=(part[0]+part[1])*0.5;
 		for (i=1;i<partes-1;i++){
 			auxVec[i]=(part[i-1]+part[i]+part[i+1])*tercio;
@@ -58,13 +49,6 @@ void funcionA(int id, int N, int partes){
 		if (convergeLocal && (fabs(auxVec[0]-auxVec[partes-1])>0.01)){
 			convergeLocal=0;
 		}
-		//hacer las comparaciones
-		/*for (i=0;i<partes-1;i++){
-			if (fabs(auxVec[0]-auxVec[i])>0.01){
-				convergeLocal=0;
-				break;
-			}
-		}*/
 		aux = part;
 		part = auxVec;
 		auxVec = aux;
@@ -73,12 +57,9 @@ void funcionA(int id, int N, int partes){
 	}
 	MPI_Gather(part, partes, MPI_FLOAT, vec, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	printf("Tiempo: %lf\n", dwalltime()-timetick);
-	/*for(i=0;i<N;i++){
-		printf("%lf\n", vec[i]);
-	}*/
 }
 
-void funcionB(int id,int T, int N){
+void funcionB(int id,int T, int N, float tercio){
 	int partes = N/T;
 	float* auxVec = malloc(partes*sizeof(float));
 	float* valores = malloc(2*sizeof(float)); //contiene primer y ultimo valor (externos, de otros procesos)
@@ -106,20 +87,11 @@ void funcionB(int id,int T, int N){
 		MPI_Irecv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD, &request);
 		MPI_Wait(&request, &status);
 	}
-	/*if (id!=T-1){
-		MPI_Recv(&valores[1], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-		MPI_Send(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD);
-		MPI_Send(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
-		MPI_Recv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-	}
-	else {
-		MPI_Send(&part[0], 1, MPI_FLOAT, id-1, 30, MPI_COMM_WORLD);
-		MPI_Recv(&valores[0], 1, MPI_FLOAT, id-1, 31, MPI_COMM_WORLD,MPI_STATUS_IGNORE);
-	}*/
 	//hacer calculos
 	auxVec[0]=(valores[0]+part[0]+part[1])*tercio;
 	for (i=1;i<partes-1;i++){
 		auxVec[i]=(part[i-1]+part[i]+part[i+1])*tercio;
+		//printf("%f\n", auxVec[i]);
 		if (fabs(v0-auxVec[i])>0.01){
 			convergeLocal=0;
 			break;
@@ -138,15 +110,6 @@ void funcionB(int id,int T, int N){
 	if (convergeLocal && (fabs(v0-auxVec[partes-1])>0.01)){ //calculo convergencia al final
 		convergeLocal=0;
 		}
-
-	//hacer las comparaciones
-	/*for (i=0;i<partes-1;i++){
-		if (fabs(v0-auxVec[i])>0.01){
-			convergeLocal=0;
-			break;
-		}
-	}*/
-
 	//swap
 	aux = part;
 	part = auxVec;
@@ -162,13 +125,14 @@ int main(int argc, char** argv){
 	int miID;
 	int T; //cantidad de procesos
 	int N;
+	float tercio = 1.0/3.0;
 	MPI_Init(&argc, &argv); // Inicializa el ambiente. No debe haber sentencias antes
 	MPI_Comm_rank(MPI_COMM_WORLD,&miID); // Obtiene el identificador de cada proceso (rank)
 	MPI_Comm_size(MPI_COMM_WORLD,&T); // Obtiene el numero de procesos
 	N= atoi(argv[1]);
 	printf("Threads: %d - N: %d\n", T,N);
-	if (miID == 0) funcionA(miID, N, N/T);
-	else funcionB(miID,T, N);
+	if (miID == 0) funcionA(miID, N, N/T, tercio);
+	else funcionB(miID,T, N, tercio);
 	MPI_Finalize(); // Finaliza el ambiente MPI. No debe haber sentencias después
 	return(0); // Luego del MPI_Finalize()
 	}
