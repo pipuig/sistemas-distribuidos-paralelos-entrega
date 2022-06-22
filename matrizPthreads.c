@@ -20,9 +20,11 @@ void* funcion(void *arg){
   float primero;
   int posInicio=pos*(tid);
   int posFinal=posInicio+pos;
+  int finalChequeo;
+  int inicioChequeo;
 
   if (tid==0) posInicio++;
-  if (tid==(T-1)) posFinal--;
+  else if (tid==(T-1)) posFinal--;
 
   while(convergeGlobal == 0){
 
@@ -101,13 +103,13 @@ void* funcion(void *arg){
       }
 
 
-      int inicioChequeo=posInicio*N; //porque posInicio no se deberia tocar
-      int finalChequeo=posFinal*N;
+      inicioChequeo=posInicio*N; //porque posInicio no se deberia tocar
+      finalChequeo=posFinal*N;
 
       if(tid==0){
         inicioChequeo=1;
       }
-      if(tid==T-1){
+      else if(tid==T-1){
         finalChequeo=N*N;
       }
 

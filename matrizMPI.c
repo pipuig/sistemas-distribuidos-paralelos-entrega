@@ -106,7 +106,7 @@ void funcionA(int id, int N, int T){
 		MPI_Allreduce(&convergeLocal, &convergeGlobal, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
 	}
 	MPI_Gather(part, partes*N, MPI_FLOAT, M, partes*N, MPI_FLOAT, 0, MPI_COMM_WORLD);
-  	printf("Tiempo: %lf\n", dwalltime()-timetick);
+  	printf("Tiempo: %lf con %d iteraciones\n", dwalltime()-timetick, iteraciones);
   //printf("iteracion: %d \n",iteraciones);
 }
 

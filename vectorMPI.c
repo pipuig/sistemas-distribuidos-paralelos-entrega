@@ -26,13 +26,13 @@ void funcionA(int id, int N, int partes, float tercio){
 	MPI_Scatter(vec, partes, MPI_FLOAT, part, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
 	while(convergeGlobal == 0){
 		convergeLocal=1;
+		auxVec[0]=(part[0]+part[1])*0.5;
 		//enviar primer valor a todos
 		MPI_Bcast(&auxVec[0], 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
 
 		MPI_Isend(&part[partes-1], 1, MPI_FLOAT, id+1, 31, MPI_COMM_WORLD, &request);
 		MPI_Irecv(&valor[0], 1, MPI_FLOAT, id+1, 30, MPI_COMM_WORLD, &request);
 		MPI_Wait (&request, &status);//espero que finalice el receive
-		auxVec[0]=(part[0]+part[1])*0.5;
 		for (i=1;i<partes-1;i++){
 			auxVec[i]=(part[i-1]+part[i]+part[i+1])*tercio;
 			if (fabs(auxVec[0]-auxVec[i])>0.01){
@@ -54,9 +54,10 @@ void funcionA(int id, int N, int partes, float tercio){
 		auxVec = aux;
 		//reduccion
 		MPI_Allreduce(&convergeLocal, &convergeGlobal, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+		iteraciones++;
 	}
 	MPI_Gather(part, partes, MPI_FLOAT, vec, partes, MPI_FLOAT, 0, MPI_COMM_WORLD);
-	printf("Tiempo: %lf\n", dwalltime()-timetick);
+	printf("Tiempo: %lf con %d iteraciones\n", dwalltime()-timetick, iteraciones);
 }
 
 void funcionB(int id,int T, int N, float tercio){
